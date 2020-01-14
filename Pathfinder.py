@@ -169,8 +169,7 @@ def main():
     mygrid = Grid(50,50)
     mygrid.show(screen)
     textinput = pygame_textinput.TextInput()
-
-    font = pygame.font.Font('freesansbold.ttf', 32)
+    font = pygame.font.Font('freesansbold.ttf', 25)
     text = font.render('Enter the starting coordinates(0 < x,y < 50):', True, (0,0,0), (255,255,255))
     textRect = text.get_rect()
     textRect.center = (750 // 2, 20)
@@ -192,12 +191,17 @@ def main():
                 sc = int(coordinates[1])
                 done = 1
                 text = font.render('Enter the ending coordinates(0 < x,y < 50):', True, (0,0,0), (255,255,255))
+                textRect = text.get_rect()
+                textRect.center = (750 // 2, 20)
                 #print(coordinates)
 
             elif done == 1:
                 coordinates = string.split(",")
                 mygrid.grid[int(coordinates[0])][int(coordinates[1])] = "E"
                 done+=1
+                text = font.render('Press ENTER to start.', True, (0,0,0), (255,255,255))
+                textRect = text.get_rect()
+                textRect.center = (750 // 2, 20)
                 #print(coordinates)
 
             elif done == 2:
@@ -218,7 +222,27 @@ def main():
                         column = val%C
                         row = int((val-column)/C)
                         val = parent[row][column]
-                #print ("( 0 , 0 )")
+                    text = font.render('Path found!', True, (0,0,0), (255,255,255))
+                    textRect = text.get_rect()
+                    textRect.center = (750 // 2, 20)
+                    done = 3        
+
+                else:
+                    text = font.render('No solution possible!', True, (0,0,0), (255,255,255))
+                    textRect = text.get_rect()
+                    textRect.center = (750 // 2, 20)
+                    done = 3
+
+            # elif done == 3:
+            #     done = 0
+            #     mygrid = Grid(50,50)
+            #     mygrid.show(screen)
+            #     textinput = pygame_textinput.TextInput()
+            #     font = pygame.font.Font('freesansbold.ttf', 25)
+            #     text = font.render('Enter the starting coordinates(0 < x,y < 50):', True, (0,0,0), (255,255,255))
+            #     textRect = text.get_rect()
+            #     textRect.center = (750 // 2, 20)
+
 
 
             textinput = pygame_textinput.TextInput()
