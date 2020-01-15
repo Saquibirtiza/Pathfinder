@@ -3,6 +3,7 @@ import pygame
 import pygame_textinput
 import numpy as np
 import queue
+import time
 
 screen = pygame.display.set_mode((750,850), 0, 32)
 
@@ -62,16 +63,16 @@ def explore_neighbours(r,c,matrix):
 
 
 
-def solver(matrix):
+def solver(mygrid, screen):
     rq.put(sr)
     cq.put(sc)
-    m = matrix
+    m = mygrid.grid
     # for i in range(0,50):
     #     for j in range(0,50):
     #         print(m[i][j], end = " ")
     #     print(" ")
 
-    visited[sr][sc] = 1
+    m[sr][sc] = 1
     global nodes_current_layer
     global move_count
     global nodes_next_layer
@@ -79,7 +80,11 @@ def solver(matrix):
     global column
     global reached_end
 
+
     while rq.qsize() > 0:
+        # mygrid.show(screen)
+        # mygrid.grid[0][0] = 1
+        # print("yes")
         r = rq.get()
         c = cq.get()
         if m[r][c] == 'E':
@@ -139,8 +144,11 @@ class Grid:
                 if self.grid[h][w] == 0:
                     block_color = (238,213,183)
 
-                if self.grid[h][w] == 1:
+                if self.grid[h][w] == 4:
                     block_color = (0,0,255)
+
+                if self.grid[h][w] == 1:
+                    block_color = (255,0,255)
 
                 if self.grid[h][w] == "B":
                     block_color = (238,233,233)
@@ -160,17 +168,26 @@ def draw_grid():
         pygame.draw.line(screen, (0,0,0), (0, y), (750, y))
 
 def main():
+    global reached_end
+    global move_count
+    global nodes_current_layer
+    global nodes_next_layer
+    global parent
+    global visited
     global row
     global column
     global sr
     global sc
+    global rq
+    global cq
+
     pygame.init()
     done = 0
     mygrid = Grid(50,50)
     mygrid.show(screen)
     textinput = pygame_textinput.TextInput()
     font = pygame.font.Font('freesansbold.ttf', 25)
-    text = font.render('Enter the starting coordinates(0 < x,y < 50):', True, (0,0,0), (255,255,255))
+    text = font.render('Enter the starting coordinates(0 < x,y < 49):', True, (0,0,0), (255,255,255))
     textRect = text.get_rect()
     textRect.center = (750 // 2, 20)
 
@@ -190,7 +207,7 @@ def main():
                 sr = int(coordinates[0])
                 sc = int(coordinates[1])
                 done = 1
-                text = font.render('Enter the ending coordinates(0 < x,y < 50):', True, (0,0,0), (255,255,255))
+                text = font.render('Enter the ending coordinates(0 < x,y < 49):', True, (0,0,0), (255,255,255))
                 textRect = text.get_rect()
                 textRect.center = (750 // 2, 20)
                 #print(coordinates)
@@ -205,7 +222,12 @@ def main():
                 #print(coordinates)
 
             elif done == 2:
-                output = solver(mygrid.grid)
+                # for i in range(0,50):
+                #     for j in range(0,50):
+                #         print(mygrid.grid[i][j], end = " ")
+                #     print(" ")
+
+                output = solver(mygrid, screen)
                 #print(row)
                 if (output != -1):
                     val = parent[row][column]
@@ -218,7 +240,7 @@ def main():
                         if row == sr and column == sc: 
                             break
                         #print("(",row,",", column,")")
-                        mygrid.grid[row][column] = 1
+                        mygrid.grid[row][column] = 4
                         column = val%C
                         row = int((val-column)/C)
                         val = parent[row][column]
@@ -233,15 +255,26 @@ def main():
                     textRect.center = (750 // 2, 20)
                     done = 3
 
-            # elif done == 3:
-            #     done = 0
-            #     mygrid = Grid(50,50)
-            #     mygrid.show(screen)
-            #     textinput = pygame_textinput.TextInput()
-            #     font = pygame.font.Font('freesansbold.ttf', 25)
-            #     text = font.render('Enter the starting coordinates(0 < x,y < 50):', True, (0,0,0), (255,255,255))
-            #     textRect = text.get_rect()
-            #     textRect.center = (750 // 2, 20)
+            elif done == 3:
+                reached_end = False
+                rq = queue.Queue(0)
+                cq = queue.Queue(0)
+                move_count = 0
+                nodes_current_layer = 1
+                nodes_next_layer = 0
+                column = 0
+                row = 0
+                visited = np.zeros((50,50), dtype=int)
+                parent = np.zeros((50,50), dtype=int)
+
+                done = 0
+                mygrid = Grid(50,50)
+                mygrid.show(screen)
+                textinput = pygame_textinput.TextInput()
+                font = pygame.font.Font('freesansbold.ttf', 25)
+                text = font.render('Enter the starting coordinates(0 < x,y < 50):', True, (0,0,0), (255,255,255))
+                textRect = text.get_rect()
+                textRect.center = (750 // 2, 20)
 
 
 
@@ -261,7 +294,7 @@ def main():
                 pygame.quit()
                 sys.exit()
         
-        
+        #print("s")
         mygrid.show(screen)
         draw_grid()
         pygame.display.update()        
