@@ -40,7 +40,7 @@ column = 0
 row = 0
 
 
-def explore_neighbours(r,c,matrix):
+def explore_neighbours(r,c,matrix,mygrid):
     global nodes_next_layer
 
     m = matrix
@@ -58,6 +58,15 @@ def explore_neighbours(r,c,matrix):
         cq.put(cc)
         parent[rr][cc] = (r)*C + c
         visited[rr][cc] = 1
+
+        if mygrid.grid[rr][cc]!="E":
+            mygrid.grid[rr][cc] = 1
+
+        mygrid.show(screen)
+        draw_grid()
+        pygame.display.update() 
+        time.sleep(0.000001)
+
         nodes_next_layer += 1
 
 
@@ -73,6 +82,7 @@ def solver(mygrid, screen):
     #     print(" ")
 
     m[sr][sc] = 1
+    #mygrid.grid[sr][sc] = "S"
     global nodes_current_layer
     global move_count
     global nodes_next_layer
@@ -80,11 +90,7 @@ def solver(mygrid, screen):
     global column
     global reached_end
 
-
     while rq.qsize() > 0:
-        # mygrid.show(screen)
-        # mygrid.grid[0][0] = 1
-        # print("yes")
         r = rq.get()
         c = cq.get()
         if m[r][c] == 'E':
@@ -92,7 +98,9 @@ def solver(mygrid, screen):
             column = c
             reached_end = True
             break
-        explore_neighbours(r,c,m)
+        explore_neighbours(r,c,m,mygrid)
+
+        mygrid.grid[r][c] = 2
         nodes_current_layer -= 1
         if nodes_current_layer == 0:
             nodes_current_layer = nodes_next_layer
@@ -144,11 +152,14 @@ class Grid:
                 if self.grid[h][w] == 0:
                     block_color = (238,213,183)
 
-                if self.grid[h][w] == 4:
-                    block_color = (0,0,255)
-
                 if self.grid[h][w] == 1:
-                    block_color = (255,0,255)
+                    block_color = (255,140,0)
+
+                if self.grid[h][w] == 2:
+                    block_color = (255,165,0)
+
+                if self.grid[h][w] == 3:
+                    block_color = (0,0,255)
 
                 if self.grid[h][w] == "B":
                     block_color = (238,233,233)
@@ -228,9 +239,10 @@ def main():
                 #     print(" ")
 
                 output = solver(mygrid, screen)
-                #print(row)
+                #print(row) 
                 if (output != -1):
                     val = parent[row][column]
+                    count = 0
                     # print("Parent Matrix: ")
                     # print(parent)
                     # print("Path:")
@@ -240,11 +252,15 @@ def main():
                         if row == sr and column == sc: 
                             break
                         #print("(",row,",", column,")")
-                        mygrid.grid[row][column] = 4
+                        if count != 0: 
+                            mygrid.grid[row][column] = 3
                         column = val%C
                         row = int((val-column)/C)
                         val = parent[row][column]
+                        count += 1
+
                     text = font.render('Path found!', True, (0,0,0), (255,255,255))
+                    mygrid.grid[sr][sc] = "S"
                     textRect = text.get_rect()
                     textRect.center = (750 // 2, 20)
                     done = 3        
