@@ -60,12 +60,12 @@ def explore_neighbours(r,c,matrix,mygrid):
         visited[rr][cc] = 1
 
         if mygrid.grid[rr][cc]!="E":
-            mygrid.grid[rr][cc] = 1
+            mygrid.grid[rr][cc] = 10000
 
-        mygrid.show(screen)
-        draw_grid()
-        pygame.display.update() 
-        time.sleep(0.000001)
+        # mygrid.show(screen)
+        # draw_grid()
+        # pygame.display.update() 
+        # time.sleep(0.1)
 
         nodes_next_layer += 1
 
@@ -99,13 +99,37 @@ def solver(mygrid, screen):
             reached_end = True
             break
         explore_neighbours(r,c,m,mygrid)
+        mygrid.show(screen)
+        draw_grid()
+        pygame.display.update() 
+        time.sleep(0.01)
 
-        mygrid.grid[r][c] = 2
+        events = pygame.event.get()
+        for event in events:
+            if pygame.mouse.get_pressed()[0]:
+                # print(pygame.mouse.get_pos())
+                x_block = (pygame.mouse.get_pos()[0])//15
+                y_block = (pygame.mouse.get_pos()[1] - 100)//15
+                if(pygame.mouse.get_pos()[1] > 100):
+                    mygrid.grid[y_block][x_block] = "B"
+                    
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+
+        #mygrid.grid[r][c] = 10000
+        
         nodes_current_layer -= 1
         if nodes_current_layer == 0:
             nodes_current_layer = nodes_next_layer
             nodes_next_layer = 0
             move_count += 1
+            for i in range(0,50):
+                for j in range(0,50):
+                    if mygrid.grid[i][j] != 0 and mygrid.grid[i][j] != "E" and mygrid.grid[i][j] != "B": 
+                        temp = int(mygrid.grid[i][j])
+                        mygrid.grid[i][j] = str(temp - 10)
+            
     if reached_end:
         return move_count
     return -1
@@ -148,27 +172,44 @@ class Grid:
                 y = 100 + 15*h
                 block_hei = 15
                 block_wid = 15
-                
-                if self.grid[h][w] == 0:
-                    block_color = (238,213,183)
-
-                if self.grid[h][w] == 1:
-                    block_color = (255,140,0)
-
-                if self.grid[h][w] == 2:
-                    block_color = (255,165,0)
-
-                if self.grid[h][w] == 3:
-                    block_color = (0,0,255)
 
                 if self.grid[h][w] == "B":
                     block_color = (238,233,233)
 
-                if self.grid[h][w] == "S":    
+                elif self.grid[h][w] == "S":    
                     block_color = (0,255,0)
 
-                if self.grid[h][w] == "E":    
+                elif self.grid[h][w] == "E":    
                     block_color = (255,0,0)
+
+                elif self.grid[h][w] == 0:
+                    block_color = (238,213,183)
+
+                # elif self.grid[h][w] == 1:
+                #     block_color = (255,110,0)
+
+                elif self.grid[h][w] == 3:
+                    block_color = (0,0,255)
+
+                # elif int(self.grid[h][w]) > 9500:
+                #     block_color = (255,120,0)
+
+                # elif int(self.grid[h][w]) > 8900:
+                #     block_color = (255,140,0)
+                
+                # elif int(self.grid[h][w]) > 8200:
+                #     block_color = (255,160,0)
+
+                # elif int(self.grid[h][w]) > 7400:
+                #     block_color = (255,180,0)
+
+                # elif int(self.grid[h][w]) > 6500:
+                #     block_color = (255,200,0)
+
+                else:
+                    temp = np.mod(int(self.grid[h][w]),100) + 100
+                    block_color = (255,temp,0)
+
 
                 pygame.draw.rect(screen, block_color, (x,y,block_wid,block_hei))
 
@@ -227,7 +268,7 @@ def main():
                 coordinates = string.split(",")
                 mygrid.grid[int(coordinates[0])][int(coordinates[1])] = "E"
                 done+=1
-                text = font.render('Press ENTER to start.', True, (0,0,0), (255,255,255))
+                text = font.render('Draw WALLS on the grid and press ENTER to start.', True, (0,0,0), (255,255,255))
                 textRect = text.get_rect()
                 textRect.center = (750 // 2, 20)
                 #print(coordinates)
@@ -254,19 +295,21 @@ def main():
                         #print("(",row,",", column,")")
                         if count != 0: 
                             mygrid.grid[row][column] = 3
+                        else:
+                            mygrid.grid[row][column] = "S"
                         column = val%C
                         row = int((val-column)/C)
                         val = parent[row][column]
                         count += 1
 
-                    text = font.render('Path found!', True, (0,0,0), (255,255,255))
+                    text = font.render('Path found! Press ENTER to reset.', True, (0,0,0), (255,255,255))
                     mygrid.grid[sr][sc] = "S"
                     textRect = text.get_rect()
                     textRect.center = (750 // 2, 20)
                     done = 3        
 
                 else:
-                    text = font.render('No solution possible!', True, (0,0,0), (255,255,255))
+                    text = font.render('No solution possible! Press ENTER to reset.', True, (0,0,0), (255,255,255))
                     textRect = text.get_rect()
                     textRect.center = (750 // 2, 20)
                     done = 3
