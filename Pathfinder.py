@@ -102,7 +102,7 @@ def solver(mygrid, screen):
         mygrid.show(screen)
         draw_grid()
         pygame.display.update() 
-        time.sleep(0.01)
+        time.sleep(0.0001)
 
         events = pygame.event.get()
         for event in events:
