@@ -11,3 +11,7 @@ Pathfinder is a python visualizer program that shows how the shortest path algor
 ### Credits
 
 Text input module imported from: https://github.com/Nearoo/pygame-text-input
+
+### Contributor(s):
+
+Md. Abrar Labib: https://github.com/abrar-labib
